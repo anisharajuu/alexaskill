@@ -1,5 +1,6 @@
-//Skill to play fizz buzz game 
+//plays fizz buzz game 
 const Alexa = require('ask-sdk-core');
+const myFunctions = require('./lib/functions');
 
 let previousNum = 0;
 
@@ -20,54 +21,6 @@ const LaunchRequestHandler = {
   }
 };
 
-// Converts a num to 'Fizz', buzz or fizzbuzz.
-// if  a number is divisible by 3 then return fizz
-function convertNumToFizzBuzz(num){
-    var speechText = "";
-        if(num % 3 === 0 && num % 5 === 0){
-            speechText = "fizzbuzz";
-        }else if (num % 3 === 0){
-            speechText = "Fizz";
-        }else if (num % 5 === 0){
-            speechText = "Buzz";
-        }else{
-            speechText= num.toString();
-        }
-    return speechText;
-}
-function isOrdered(num,previousNum){
-    if(previousNum+2 === num){
-        return true;
-    }else{
-        return false;
-    }
-    
-    
-}
-function isStringValid(previousNum,str){
-    if(previousNum % 3 === 0 && previousNum % 5 === 0 && str === 'fizz buzz'){
-        return true;
-    }else if (previousNum % 3 === 0 && str === 'fizz'){
-        return true;
-    }else if(previousNum % 5 === 0 && str === 'buzz'){
-        return true;
-    }else{
-        return false;
-    }
-    
-}
-
-function stringOrNot(num){
-    if(num % 3 === 0 && num % 5 === 0){
-            return false;
-        }else if (num % 3 === 0){
-            return false;
-        }else if (num % 5 === 0){
-            return false;
-        }else{
-            return true;
-        }
-}
 const FizzBuzzIntentHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -83,48 +36,38 @@ const FizzBuzzIntentHandler = {
         num = Number(handlerInput.requestEnvelope.request.intent.slots.number.value);
         
         // Is the current number valid and is sequential
-        if(isOrdered(num,previousNum)){
-            if(stringOrNot(num)){
+        if(myFunctions.isOrdered(num,previousNum)){
+            if(myFunctions.stringOrNot(num)){
                 previousNum= num;
                 num++;
-                if(num === 13){
-                    speechText = 'wow you made it so far.. keep going...: ' + convertNumToFizzBuzz(num);
-                    
+                if(num === 9){
+                    speechText = 'wow you made it so far.. keep it up!.. it is still my turn.. ' + myFunctions.convertNumToFizzBuzz(num);
                 }else{
-                    speechText = convertNumToFizzBuzz(num);
+                    speechText = myFunctions.convertNumToFizzBuzz(num);
                 }
-                
-                
             }else{
-                speechText = "I'm sorry, the correct response was: " + convertNumToFizzBuzz(num) + 
-                ".... You lose! Thanks for playing Fizz Buzz. For another great Alexa game, check out Song Quiz!";
-                
-
+                speechText = "I'm sorry, the correct response was: " + myFunctions.convertNumToFizzBuzz(num) + 
+                ".... You lose! Alexa wins!... Thanks for playing Fizz Buzz.";
             }
-            
         }else{
             speechText = speechText = "I'm sorry, the correct response was: " + (previousNum+2).toString() + 
-                ".... You lose! Thanks for playing Fizz Buzz. For another great Alexa game, check out Song Quiz !";
+                ".... You lose! Alexa wins!... Thanks for playing Fizz Buzz.";
                 
         }   
     } else {
         var str = handlerInput.requestEnvelope.request.intent.slots.string.value; 
         
-        
-        
-        if(isStringValid(previousNum + 2 , str)){
-            speechText=convertNumToFizzBuzz(previousNum+3);
+        // previousNum + 3 = number previously spoken + 3 to get next number after string (slots.value) is said 
+        if(myFunctions.isStringValid(previousNum + 2 , str)){
+            speechText = myFunctions.convertNumToFizzBuzz(previousNum+3);
             previousNum= previousNum+2;
+            // if string is valid, alexa says next number, and saves previousNum to a new value of previousNum + 2 (the current number)
         }else{
-             speechText = "I'm sorry, the correct response was: " + (previousNum+3).toString() + 
-                ".... You lose! Thanks for playing Fizz Buzz. For another great Alexa game, check out Song Quiz!!";
-                
-                
+             speechText = "I'm sorry, the correct response was: " + (previousNum+2).toString() + 
+                ".... You lose! Alexa Wins!... Thanks for playing Fizz Buzz..";
         }
-        
-        
     }
-  
+    
     return handlerInput.responseBuilder
       .speak(speechText)
       .withShouldEndSession(false)
@@ -147,7 +90,7 @@ const HelpIntentHandler = {
       && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.HelpIntent';
   },
   handle(handlerInput) {
-    const speechText = 'To start over say "load fizz buzz game... to end game say stop or cancel';
+    const speechText = 'to play the fizz buzz game, you must replace numbers divisible by 3 with the word “fizz” and you must replace numbers divisible by 5 with the word “buzz”. A number divisible by both 3 and 5, should be “fizz buzz”. continue playing... or... If you want to end game,  say stop or cancel';
 
     return handlerInput.responseBuilder
       .speak(speechText)
@@ -155,7 +98,9 @@ const HelpIntentHandler = {
       .withShouldEndSession(false)
       .withSimpleCard('Hello human', speechText)
       .getResponse();
+      
   }
+  
 };
 
 const FallbackIntentHandler = {
@@ -164,7 +109,7 @@ const FallbackIntentHandler = {
       && (handlerInput.requestEnvelope.request.intent.name === 'AMAZON.FallbackIntent');
   },
   handle(handlerInput) {
-    const speechText = 'Sorry not part of game.. you lose. Please start over!';
+    const speechText = 'Sorry that is not part of the game.. you lose.';
 
     return handlerInput.responseBuilder
       .speak(speechText)
@@ -187,6 +132,7 @@ const CancelAndStopIntentHandler = {
       .getResponse();
   }
 };
+ // system error will throw ErrorHandler and will gracefully exit game
 const ErrorHandler = {
   canHandle() {
     return true;
@@ -195,8 +141,8 @@ const ErrorHandler = {
     console.log(`Error handled: ${error.message}`);
 
     return handlerInput.responseBuilder
-      .speak('Sorry, this is not part of the game. If you would like to start over, say load fizz buzz game')
-      .reprompt('Sorry, this is not part of the game. If you would like to start over, say load fizz buzz game')
+      .speak('Sorry, this is not part of the game... you lose!... If you would like to start over, say load fizz buzz game')
+      .reprompt('Sorry, this is not part of the game... you lose!.... If you would like to start over, say load fizz buzz game')
       .getResponse();
   },
 };
