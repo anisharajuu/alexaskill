@@ -24,7 +24,6 @@ const LaunchRequestHandler = {
 // if  a number is divisible by 3 then return fizz
 function convertNumToFizzBuzz(num){
     var speechText = "";
-        console.log("Value is " + num);
         if(num % 3 === 0 && num % 5 === 0){
             speechText = "fizzbuzz";
         }else if (num % 3 === 0){
