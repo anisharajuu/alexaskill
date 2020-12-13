@@ -1,4 +1,4 @@
-//plays fizz buzz game 
+//Skill to play fizz buzz game 
 const Alexa = require('ask-sdk-core');
 
 let previousNum = 0;
