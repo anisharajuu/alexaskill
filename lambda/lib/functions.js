@@ -1,6 +1,6 @@
 
 // Converts a num to 'Fizz', 'buzz' or 'fizzbuzz'.
-// if  a number is divisible by 3, then return 'fizz'
+// if  a number is divisible by 3, then return 'fizz' 
 function convertNumToFizzBuzz(num){
     var speechText = "";
         if(num % 3 === 0 && num % 5 === 0){

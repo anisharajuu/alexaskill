@@ -1,4 +1,4 @@
-//plays fizz buzz game 
+//plays fizz buzz game
 const Alexa = require('ask-sdk-core');
 const myFunctions = require('./lib/functions');
 
